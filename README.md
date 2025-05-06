@@ -41,7 +41,7 @@ python gen_analysis.py path/to/your_pjm_data.csv
 or with uv:
 
 ```
-  uv run --with polars --with matplotlib gen_analysis.py path/to/your_pjm_data.CSV
+  uv run --with polars gen_analysis.py path/to/your_pjm_data.CSV
 ```
 
 ## Example Output (April 2025)

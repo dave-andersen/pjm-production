@@ -18,7 +18,7 @@ pip install polars
 using [uv](https://github.com/astral-sh/uv),
 
 ```
-  uv run --with polars --with matplotlib gen_analysis.py <CSV_FILE>
+  uv run --with polars gen_analysis.py <CSV_FILE>
 ```
 
 ## Data Source

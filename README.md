@@ -60,6 +60,6 @@ Percentage renewable: 11.95%
   - Coal generation: 9549318 MWh
   - Multiple Fuels generation: 564518 MWh
   - Nuclear generation: 20355623 MWh
-Peak coal generation: 18460.00 MWh at 4/4/2025 3:00:00 PM
-Peak renewable generation: 21228.00 MWh at 4/18/2025 1:00:00 PM
+Peak coal generation: 18460 MW at 4/4/2025 3:00:00 PM
+Peak renewable generation: 21228 MW at 4/18/2025 1:00:00 PM
 ```

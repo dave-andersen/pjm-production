@@ -10,16 +10,16 @@ def analyze_production(csv_name):
     df = pl.read_csv(csv_name)
     other_types = df.filter(pl.col("fuel_type").is_in(renewable_types) == False)["fuel_type"].unique().to_list()
 
-    total_mw = df["mw"].sum()
+    total_mwh = df["mw"].sum()
 
     renewable_data = df.filter(pl.col("fuel_type").is_in(renewable_types))
-    renewable_mw = renewable_data["mw"].sum()
+    renewable_mwh = renewable_data["mw"].sum()
 
-    coal_mw = mwh_by_type(df, "Coal")
+    coal_mwh = mwh_by_type(df, "Coal")
 
-    print(f"Total generation: {total_mw} MWh")
-    print(f"Renewable generation: {renewable_mw} MWh")
-    print(f"Percentage renewable: {(renewable_mw/total_mw)*100:.2f}%")
+    print(f"Total generation: {total_mwh} MWh")
+    print(f"Renewable generation: {renewable_mwh} MWh")
+    print(f"Percentage renewable: {(renewable_mwh/total_mwh)*100:.2f}%")
     for source in renewable_types + other_types:
         gen = mwh_by_type(df, source)
         print(f"  - {source} generation: {gen} MWh")
@@ -36,8 +36,8 @@ def analyze_production(csv_name):
     renewable_peak_time = renewable_peak["datetime_beginning_ept"].item()
     renewable_peak_mw = renewable_peak["total_mw"].item()
 
-    print(f"Peak coal generation: {coal_peak_mw:.2f} MWh at {coal_peak_hour}")
-    print(f"Peak renewable generation: {renewable_peak_mw:.2f} MWh at {renewable_peak_time}")
+    print(f"Peak coal generation: {coal_peak_mw} MW at {coal_peak_hour}")
+    print(f"Peak renewable generation: {renewable_peak_mw} MW at {renewable_peak_time}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Analyze power generation data from PJM")

@@ -24,24 +24,23 @@ def analyze_production(csv_name):
         gen = mwh_by_type(df, source)
         print(f"  - {source} generation: {gen} MWh")
 
-    # Find peak coal generation
-    coal_data = df.filter(pl.col("fuel_type") == "Coal")
-    coal_peak = coal_data.sort("mw", descending=True).head(1)
-    coal_peak_hour = coal_peak["datetime_beginning_ept"].item()
-    coal_peak_mw = coal_peak["mw"].item()
+    def find_peak(type_df):
+        i = type_df.sort("mw", descending=True).head(1)
+        return i["datetime_beginning_ept"].item(), i["mw"].item()
 
-    # Find peak renewable generation
-    renewable_hourly = renewable_data.group_by("datetime_beginning_ept").agg(pl.sum("mw").alias("total_mw"))
-    renewable_peak = renewable_hourly.sort("total_mw", descending=True).head(1)
-    renewable_peak_time = renewable_peak["datetime_beginning_ept"].item()
-    renewable_peak_mw = renewable_peak["total_mw"].item()
+    coal_data = df.filter(pl.col("fuel_type") == "Coal")
+    coal_peak_hour, coal_peak_mw = find_peak(coal_data)
+
+    renewable_hourly = renewable_data.group_by("datetime_beginning_ept").agg(pl.sum("mw").alias("mw"))
+    renewable_peak_hour, renewable_peak_mw = find_peak(renewable_hourly)
 
     print(f"Peak coal generation: {coal_peak_mw} MW at {coal_peak_hour}")
-    print(f"Peak renewable generation: {renewable_peak_mw} MW at {renewable_peak_time}")
+    print(f"Peak renewable generation: {renewable_peak_mw} MW at {renewable_peak_hour}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Analyze power generation data from PJM")
-    parser.add_argument("csv_file", help="Path to the CSV file containing generation data")
+    parser.add_argument("csv_file", help="Path to the CSV file containing generation data",
+        type=argparse.FileType('rb'))
     args = parser.parse_args()
 
     analyze_production(args.csv_file)

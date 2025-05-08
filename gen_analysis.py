@@ -3,23 +3,38 @@ import polars as pl
 
 renewable_types = ["Hydro", "Wind", "Solar", "Storage", "Other Renewables"]
 
-def mwh_by_type(df, fuel_type):
-    return df.filter(pl.col("fuel_type") == fuel_type)["mw"].sum()
-
 def analyze_production(csv_name):
     df = pl.read_csv(csv_name)
     other_types = df.filter(pl.col("fuel_type").is_in(renewable_types) == False)["fuel_type"].unique().to_list()
+    other_types.sort()
 
-    total_mwh = df["mw"].sum()
+    mwh_per_type = df.group_by("fuel_type").agg(
+           pl.sum("mw").alias("total_mw")
+       )
+    total_mwh = mwh_per_type["total_mw"].sum()
+
+    renewable_mwh_agg = mwh_per_type.filter(
+        pl.col("fuel_type").is_in(renewable_types)
+    )
+    renewable_mwh = renewable_mwh_agg["total_mw"].sum() if not renewable_mwh_agg.is_empty() else 0.0
 
     renewable_data = df.filter(pl.col("fuel_type").is_in(renewable_types))
-    renewable_mwh = renewable_data["mw"].sum()
 
     print(f"Total generation: {total_mwh} MWh")
     print(f"Renewable generation: {renewable_mwh} MWh")
-    print(f"Percentage renewable: {(renewable_mwh/total_mwh)*100:.2f}%")
+    if total_mwh > 0:
+        percentage_renewable = (renewable_mwh / total_mwh) * 100
+        print(f"Percentage renewable: {percentage_renewable:.2f}%")
+    else:
+        print("Percentage renewable: N/A (total generation is zero)")
+
+    mwh_lookup = {
+        row["fuel_type"]: row["total_mw"]
+        for row in mwh_per_type.iter_rows(named=True)
+    }
+
     for source in renewable_types + other_types:
-        gen = mwh_by_type(df, source)
+        gen = mwh_lookup[source]
         print(f"  - {source} generation: {gen} MWh")
 
     def find_peak(type_df):

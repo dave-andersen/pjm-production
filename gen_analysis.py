@@ -1,5 +1,5 @@
-import polars as pl
 import argparse
+import polars as pl
 
 renewable_types = ["Hydro", "Wind", "Solar", "Storage", "Other Renewables"]
 
@@ -14,8 +14,6 @@ def analyze_production(csv_name):
 
     renewable_data = df.filter(pl.col("fuel_type").is_in(renewable_types))
     renewable_mwh = renewable_data["mw"].sum()
-
-    coal_mwh = mwh_by_type(df, "Coal")
 
     print(f"Total generation: {total_mwh} MWh")
     print(f"Renewable generation: {renewable_mwh} MWh")

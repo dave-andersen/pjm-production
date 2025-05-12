@@ -127,11 +127,27 @@ def plot_gen(csv_path):
         "Nuclear": "yellow",
         "Oil": "brown",
         "Other Renewables": "purple",
-        "Multiple Fuels": "black" # Color for Multiple Fuels, linestyle will be handled separately
+        "Multiple Fuels": "black",
+        "All Renewables": "green",
     }
     fuel_linestyle_map = {
-        "Multiple Fuels": "dotted"
+        "Multiple Fuels": "dotted",
+        "All Renewables": "dashed",
     }
+
+    actual_renewable_columns = [
+        col for col in renewable_types if col in pivoted_df.columns
+    ]
+
+    if actual_renewable_columns:
+        pivoted_df = pivoted_df.with_columns(
+            pl.sum_horizontal(actual_renewable_columns).alias("All Renewables")
+        )
+    else:
+        pivoted_df = pivoted_df.with_columns(
+            pl.lit(0).alias("All Renewables")
+        )
+
 
     for fuel_column_name in pivoted_df.columns:
         if fuel_column_name == "datetime_beginning_ept":
@@ -139,20 +155,11 @@ def plot_gen(csv_path):
 
         mw_series = pivoted_df[fuel_column_name]
 
-        # Plot only if there's some non-null data for this fuel type
         if not mw_series.is_null().all():
-            color = fuel_color_map.get(fuel_column_name) # Get color, None if not in map
+            color = fuel_color_map.get(fuel_column_name, "black") # Get color, None if not in map
             linestyle = fuel_linestyle_map.get(fuel_column_name, '-') # Default to solid line
 
-            # Convert to NumPy arrays for robust plotting with Matplotlib
-            if color:
-                if fuel_column_name == "Multiple Fuels":
-                    ax.plot(time_col_series.to_numpy(), mw_series.to_numpy(), label=fuel_column_name, color=color, linestyle=linestyle)
-                else:
-                    ax.plot(time_col_series.to_numpy(), mw_series.to_numpy(), label=fuel_column_name, color=color)
-            else:
-                # Default plotting if fuel type not in map (matplotlib will cycle colors)
-                ax.plot(time_col_series.to_numpy(), mw_series.to_numpy(), label=fuel_column_name)
+            ax.plot(time_col_series.to_numpy(), mw_series.to_numpy(), label=fuel_column_name, color=color, linestyle=linestyle)
 
 
     ax.set_title("Energy Generation Over Time by Fuel Type")
